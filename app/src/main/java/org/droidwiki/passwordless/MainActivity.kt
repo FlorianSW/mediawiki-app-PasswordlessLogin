@@ -1,6 +1,10 @@
 package org.droidwiki.passwordless
 
+import android.app.KeyguardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatTextView
@@ -14,20 +18,27 @@ import android.widget.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
+import org.droidwiki.passwordless.adapter.MediaWikiCommunicator
 import org.droidwiki.passwordless.adapter.SQLiteHelper
 import org.droidwiki.passwordless.adapter.SecretAccountProvider
 import java.io.IOException
 import java.net.URL
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-    private val accountsProvider = SecretAccountProvider(SQLiteHelper(this))
+    private val accountsProvider: AccountsProvider = SecretAccountProvider(SQLiteHelper(this))
+    private val registrationService: Registration = MediaWikiCommunicator(accountsProvider)
+
     private lateinit var accountListContent: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        ensureDeviceSecure()
+
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -47,6 +58,30 @@ class MainActivity : AppCompatActivity() {
         }
 
         reloadList()
+    }
+
+    private fun ensureDeviceSecure() {
+        val keyGuard = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        if (!keyGuard.isDeviceSecure) {
+            val lockScreenInfo = LinearLayout(this)
+            lockScreenInfo.orientation = LinearLayout.VERTICAL
+
+            val infoText = TextView(this)
+            infoText.text = "You need to setup a screen lock in order to use this app."
+            lockScreenInfo.addView(infoText)
+
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Screen lock required")
+                .setPositiveButton("Setup") { _, _ -> run {} }
+                .setView(lockScreenInfo)
+                .setCancelable(false)
+                .create()
+
+            dialog.show()
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                startActivityForResult(Intent(Settings.ACTION_SETTINGS), 0)
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -91,37 +126,26 @@ class MainActivity : AppCompatActivity() {
         val alertDialog = builder.create()
         alertDialog.show()
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener( OnCompleteListener { task ->
+            FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener(OnCompleteListener { task ->
                 if (!task.isComplete) {
                     runOnUiThread {
                         Toast.makeText(this, "Could not get Instance ID", Toast.LENGTH_LONG).show()
                     }
                     return@OnCompleteListener
                 }
-                val instanceId = task.result?.token
+                val instanceId = task.result!!.token
 
                 val apiURL = URL(apiUrl.text.toString())
                 val name = accountName.text.toString()
-                val publicKey = accountsProvider.create(name, apiURL)
                 val accountToken = token.text.toString()
 
-                val json = MediaType.get("application/x-www-form-urlencoded")
-
-                val client = OkHttpClient()
-
-                val formContent = "action=passwordlesslogin&" +
-                        "pairToken=$accountToken&" +
-                        "deviceId=$instanceId&" +
-                        "secret=${String(Base64.getEncoder().encode(publicKey.encoded))}&" +
-                        "format=json"
-                val body = RequestBody.create(json, formContent)
-                val request = Request.Builder()
-                    .url(apiURL)
-                    .post(body)
-                    .build()
-                val call = client.newCall(request)
-
-                call.enqueue(RegisterCallback(alertDialog, name))
+                registrationService.register(
+                    name,
+                    apiURL,
+                    accountToken,
+                    instanceId,
+                    RegisterCallback(alertDialog, name)
+                )
             })
         }
 
@@ -136,24 +160,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    inner class RegisterCallback(private val alertDialog: AlertDialog, private val accountName: String) : Callback {
-        override fun onFailure(call: Call, e: IOException) {
+    inner class RegisterCallback(private val alertDialog: AlertDialog, private val accountName: String) : Registration.Callback {
+        override fun onFailure(e: Exception) {
+            accountsProvider.remove(accountName)
             runOnUiThread {
                 Toast.makeText(this@MainActivity, "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
 
-        override fun onResponse(call: Call, response: Response) {
-            val registerResponse = ObjectMapper().readValue(response.body()?.string(), RegisterResponse::class.java)
-
-            if (registerResponse.register.result === RegisterResult.Failed) {
-                accountsProvider.remove(accountName)
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Invalid token", Toast.LENGTH_LONG).show()
-                }
-                return
-            }
-
+        override fun onSuccess() {
             runOnUiThread {
                 reloadList()
                 alertDialog.dismiss()
