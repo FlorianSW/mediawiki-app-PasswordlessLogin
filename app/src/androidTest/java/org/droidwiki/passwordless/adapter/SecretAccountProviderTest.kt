@@ -6,8 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.ACCOUNT_TABLE_NAME
 import org.droidwiki.passwordless.model.Account
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,6 +68,26 @@ class SecretAccountProviderTest {
 
         assertEquals(0, provider.list().size)
         assertEquals(0, keyStoreSize())
+    }
+
+    @Test
+    fun findsByApiUrl() {
+        val apiUrl = URL("https://localhost/w/api.php")
+        provider.create("A_NAME", apiUrl)
+
+        val result = provider.findByApiUrl(apiUrl)
+
+        assertEquals("A_NAME", result.get().name)
+    }
+
+    @Test
+    fun findByApiUrl_noEntry_emptyOptional() {
+        val apiUrl = URL("https://localhost/w/api.php")
+        provider.create("A_NAME", apiUrl)
+
+        val result = provider.findByApiUrl(URL("http://localhost/wiki/api.php"))
+
+        assertFalse(result.isPresent)
     }
 
     private fun keyStoreSize(): Int  = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.aliases().toList().size

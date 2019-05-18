@@ -30,7 +30,7 @@ import java.net.URL
 
 class MainActivity : AppCompatActivity() {
     private val accountsProvider: AccountsProvider = SecretAccountProvider(SQLiteHelper(this))
-    private val registrationService: Registration = MediaWikiCommunicator(accountsProvider)
+    private val registrationService: Registration = MediaWikiCommunicator()
 
     private lateinit var accountListContent: ArrayAdapter<String>
 
@@ -138,12 +138,14 @@ class MainActivity : AppCompatActivity() {
                 val apiURL = URL(apiUrl.text.toString())
                 val name = accountName.text.toString()
                 val accountToken = token.text.toString()
+                val secret = accountsProvider.create(name, apiURL)
 
                 registrationService.register(
                     name,
                     apiURL,
                     accountToken,
                     instanceId,
+                    secret,
                     RegisterCallback(alertDialog, name)
                 )
             })
@@ -175,16 +177,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-}
-
-class RegisterResponse {
-    lateinit var register: Register
-}
-
-class Register {
-    lateinit var result: RegisterResult
-}
-
-enum class RegisterResult {
-    Success, Failed
 }

@@ -9,6 +9,10 @@ class MessageService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         val loginConfirmationIntent = Intent(this, LoginConfirmationActivity::class.java)
         loginConfirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        loginConfirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        loginConfirmationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        loginConfirmationIntent.putExtra("challenge", message.data.getValue("challenge"))
+        loginConfirmationIntent.putExtra("apiUrl", message.data.getValue("apiUrl"))
         startActivity(loginConfirmationIntent)
     }
 }

@@ -4,29 +4,27 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import org.droidwiki.passwordless.AccountsProvider
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.ACCOUNT_TABLE_NAME
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.COLUMN_API_URL
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.COLUMN_NAME
+import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.COLUMN_SECRET
 import org.droidwiki.passwordless.model.Account
-import java.lang.RuntimeException
 import java.net.URL
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.PublicKey
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
+import java.security.*
+import java.util.*
 
 
 class SecretAccountProvider(private val sqLiteHelper: SQLiteHelper) : AccountsProvider {
+    private val characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    private var random = SecureRandom()
 
-    override fun create(name: String, apiUrl: URL): PublicKey {
+    override fun create(name: String, apiUrl: URL): String {
+        val secret = createSecret()
         val values = ContentValues()
         values.put(COLUMN_NAME, name)
         values.put(COLUMN_API_URL, apiUrl.toString())
+        values.put(COLUMN_SECRET, secret)
         val writableDatabase = sqLiteHelper.writableDatabase
         val result = writableDatabase.insert(ACCOUNT_TABLE_NAME, null, values)
         writableDatabase.close()
@@ -34,24 +32,21 @@ class SecretAccountProvider(private val sqLiteHelper: SQLiteHelper) : AccountsPr
             throw RuntimeException("Database entry could not be created.")
         }
 
-        return createSecretKey(name).public
+        return secret
     }
 
-    private fun createSecretKey(name: String): KeyPair {
-        val keyGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
-        keyGenerator.initialize(
-            KeyGenParameterSpec.Builder(name, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_SIGN)
-            .setKeySize(2048)
-            .build()
-        )
+    private fun createSecret(): String {
+        val sb = StringBuilder(16)
+        for (i in 0 until 16)
+            sb.append(characters[random.nextInt(characters.length)])
 
-        return keyGenerator.genKeyPair()
+        return sb.toString()
     }
 
     override fun list(): List<Account> {
         val readableDatabase = sqLiteHelper.readableDatabase
         val resultSet = readableDatabase.query(
-            ACCOUNT_TABLE_NAME, arrayOf(COLUMN_NAME, COLUMN_API_URL), null,
+            ACCOUNT_TABLE_NAME, arrayOf(COLUMN_NAME, COLUMN_API_URL, COLUMN_SECRET), null,
             arrayOf<String>(), null, null, null
         )
 
@@ -63,8 +58,13 @@ class SecretAccountProvider(private val sqLiteHelper: SQLiteHelper) : AccountsPr
         resultSet.moveToFirst()
         val elements = mutableListOf<Account>()
         while (!resultSet.isAfterLast) {
-            elements.add(Account(resultSet.getString(resultSet.getColumnIndex(COLUMN_NAME)),
-                resultSet.getString(resultSet.getColumnIndex(COLUMN_API_URL))))
+            elements.add(
+                Account(
+                    resultSet.getString(resultSet.getColumnIndex(COLUMN_NAME)),
+                    resultSet.getString(resultSet.getColumnIndex(COLUMN_API_URL)),
+                    resultSet.getString(resultSet.getColumnIndex(COLUMN_SECRET))
+                )
+            )
             resultSet.moveToNext()
         }
         resultSet.close()
@@ -77,6 +77,14 @@ class SecretAccountProvider(private val sqLiteHelper: SQLiteHelper) : AccountsPr
 
         KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(name)
     }
+
+    override fun findByApiUrl(apiUrl: URL): Optional<Account> {
+        val result = list().filter { URL(it.apiUrl) == apiUrl }
+        if (result.isEmpty()) {
+            return Optional.empty()
+        }
+        return Optional.of(result.first())
+    }
 }
 
 class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -85,7 +93,8 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
             "CREATE TABLE " + ACCOUNT_TABLE_NAME + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_NAME + " TEXT, " +
-                    COLUMN_API_URL + " TEXT)"
+                    COLUMN_API_URL + " TEXT," +
+                    COLUMN_SECRET + " Text)"
         )
     }
 
@@ -101,5 +110,6 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         const val COLUMN_ID = "id"
         const val COLUMN_NAME = "name"
         const val COLUMN_API_URL = "api_url"
+        const val COLUMN_SECRET = "secret"
     }
 }

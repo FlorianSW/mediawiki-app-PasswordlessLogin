@@ -7,12 +7,12 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.awaitility.Awaitility.await
 import org.droidwiki.passwordless.AccountsProvider
+import org.droidwiki.passwordless.LoginVerifier
 import org.droidwiki.passwordless.Registration
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import java.security.PublicKey
 
 
 class MediaWikiCommunicatorTest {
@@ -26,7 +26,7 @@ class MediaWikiCommunicatorTest {
         apiUrl = server.url("/w/api.php")
 
         accountsProvider = mockk()
-        every { accountsProvider.create("A_NAME", apiUrl.url()) } returns FakePublicKey()
+        every { accountsProvider.create("A_NAME", apiUrl.url()) } returns "A_SECRET_STRING"
     }
 
     @After
@@ -37,10 +37,10 @@ class MediaWikiCommunicatorTest {
     @Test
     fun register_validResponse_callsSuccessCallback() {
         server.enqueue(MockResponse().setBody("{\"register\": {\"result\": \"Success\"}}"))
-        val communicator = MediaWikiCommunicator(accountsProvider)
+        val communicator = MediaWikiCommunicator()
         val callback = FakeCallback()
 
-        communicator.register("A_NAME", apiUrl.url(), "A_TOKEN", "AN_INSTANCE_ID", callback)
+        communicator.register("A_NAME", apiUrl.url(), "A_TOKEN", "AN_INSTANCE_ID", "A_SECRET", callback)
 
         await().untilAsserted {
             assertEquals(true, callback.successCalled)
@@ -51,10 +51,10 @@ class MediaWikiCommunicatorTest {
     @Test
     fun register_invalidResponse_callsFailureCallback() {
         server.enqueue(MockResponse().setBody("{\"register\": {\"result\": \"Failed\"}}"))
-        val communicator = MediaWikiCommunicator(accountsProvider)
+        val communicator = MediaWikiCommunicator()
         val callback = FakeCallback()
 
-        communicator.register("A_NAME", apiUrl.url(), "A_TOKEN", "AN_INSTANCE_ID", callback)
+        communicator.register("A_NAME", apiUrl.url(), "A_TOKEN", "AN_INSTANCE_ID", "A_SECRET", callback)
 
         await().untilAsserted {
             assertEquals(false, callback.successCalled)
@@ -62,7 +62,35 @@ class MediaWikiCommunicatorTest {
         }
     }
 
-    class FakeCallback : Registration.Callback {
+    @Test
+    fun verify_validResponse_callsSuccessCallback() {
+        server.enqueue(MockResponse().setBody("{\"verify\": {\"result\": \"Success\"}}"))
+        val communicator = MediaWikiCommunicator()
+        val callback = FakeCallback()
+
+        communicator.verify(apiUrl.url(), "A_CHALLENGE", "A_RESPONSE", callback)
+
+        await().untilAsserted {
+            assertEquals(true, callback.successCalled)
+            assertEquals(false, callback.failureCalled)
+        }
+    }
+
+    @Test
+    fun verify_invalidResponse_callsFailureCallback() {
+        server.enqueue(MockResponse().setBody("{\"verify\": {\"result\": \"Failed\"}}"))
+        val communicator = MediaWikiCommunicator()
+        val callback = FakeCallback()
+
+        communicator.verify(apiUrl.url(), "A_CHALLENGE", "A_RESPONSE", callback)
+
+        await().untilAsserted {
+            assertEquals(false, callback.successCalled)
+            assertEquals(true, callback.failureCalled)
+        }
+    }
+
+    class FakeCallback : Registration.Callback, LoginVerifier.Callback {
         var successCalled = false
         var failureCalled = false
 
@@ -72,21 +100,6 @@ class MediaWikiCommunicatorTest {
 
         override fun onFailure(e: Exception) {
             failureCalled = true
-        }
-
-    }
-
-    class FakePublicKey : PublicKey {
-        override fun getAlgorithm(): String {
-            return "RSA"
-        }
-
-        override fun getEncoded(): ByteArray {
-            return byteArrayOf()
-        }
-
-        override fun getFormat(): String {
-            return ""
         }
     }
 }

@@ -1,9 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".LoginConfirmationActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <ImageView
+        android:id="@+id/mediawiki_logo"
+        android:layout_width="match_parent"
+        android:src="@drawable/ic_person_black_24dp"
+        android:layout_height="85dp"
+        android:layout_marginTop="50dp"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginTop="25dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Are you trying to login to the following MediaWiki site?" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:id="@+id/account_name"
+        android:textColor="@color/colorBlack"
+        android:layout_marginTop="25dp"
+        android:textSize="25dp"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="45dp"
+        android:layout_marginStart="45dp"
+        android:orientation="horizontal">
+
+        <Button
+            style="@style/ConfirmationButton"
+            android:id="@+id/button_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="No"
+            android:textColor="@color/colorDesctructive" />
+
+        <Button
+            style="@style/ConfirmationButton"
+            android:id="@+id/button_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Yes"
+            android:textColor="@color/colorConstructive" />
+
+    </RelativeLayout>
+
+</LinearLayout>

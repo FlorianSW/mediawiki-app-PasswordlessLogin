@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="ConfirmationButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/confirmation_button</item>
+    </style>
+
 </resources>
