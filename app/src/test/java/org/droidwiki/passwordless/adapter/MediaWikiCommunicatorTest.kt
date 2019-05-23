@@ -9,6 +9,7 @@ import org.awaitility.Awaitility.await
 import org.droidwiki.passwordless.AccountsProvider
 import org.droidwiki.passwordless.LoginVerifier
 import org.droidwiki.passwordless.Registration
+import org.droidwiki.passwordless.model.AccountRegistrationRequest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -19,11 +20,13 @@ class MediaWikiCommunicatorTest {
     private lateinit var accountsProvider: AccountsProvider
     private lateinit var server: MockWebServer
     private lateinit var apiUrl: HttpUrl
+    private lateinit var request: AccountRegistrationRequest
 
     @Before
     fun setUp() {
         server = MockWebServer()
         apiUrl = server.url("/w/api.php")
+        request = AccountRegistrationRequest("A_NAME", apiUrl.url(), "A_TOKEN", "AN_INSTANCE_ID", "A_SECRET")
 
         accountsProvider = mockk()
         every { accountsProvider.create("A_NAME", apiUrl.url()) } returns "A_SECRET_STRING"
@@ -40,7 +43,7 @@ class MediaWikiCommunicatorTest {
         val communicator = MediaWikiCommunicator()
         val callback = FakeCallback()
 
-        communicator.register("A_NAME", apiUrl.url(), "A_TOKEN", "AN_INSTANCE_ID", "A_SECRET", callback)
+        communicator.register(request, callback)
 
         await().untilAsserted {
             assertEquals(true, callback.successCalled)
@@ -54,7 +57,20 @@ class MediaWikiCommunicatorTest {
         val communicator = MediaWikiCommunicator()
         val callback = FakeCallback()
 
-        communicator.register("A_NAME", apiUrl.url(), "A_TOKEN", "AN_INSTANCE_ID", "A_SECRET", callback)
+        communicator.register(request, callback)
+
+        await().untilAsserted {
+            assertEquals(false, callback.successCalled)
+            assertEquals(true, callback.failureCalled)
+        }
+    }
+
+    @Test
+    fun register_incompleteRequest_callsFailureCallback() {
+        val communicator = MediaWikiCommunicator()
+        val callback = FakeCallback()
+
+        communicator.register(AccountRegistrationRequest(), callback)
 
         await().untilAsserted {
             assertEquals(false, callback.successCalled)

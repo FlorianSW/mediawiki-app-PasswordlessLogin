@@ -2,33 +2,35 @@ package org.droidwiki.passwordless.adapter
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.*
-import org.droidwiki.passwordless.*
+import org.droidwiki.passwordless.LoginVerifier
+import org.droidwiki.passwordless.Registration
+import org.droidwiki.passwordless.model.AccountRegistrationRequest
 import java.io.IOException
 import java.net.URL
 
 class MediaWikiCommunicator : Registration, LoginVerifier {
 
     override fun register(
-        accountName: String,
-        apiUrl: URL,
-        accountToken: String,
-        instanceId: String,
-        secret: String,
+        request: AccountRegistrationRequest,
         callback: Registration.Callback
     ) {
+        if (!request.isComplete()) {
+            callback.onFailure(IllegalArgumentException("Request is not complete"))
+            return
+        }
         val json = MediaType.get("application/x-www-form-urlencoded")
         val client = OkHttpClient()
         val formContent = "action=passwordlesslogin&" +
-                "pairToken=$accountToken&" +
-                "deviceId=$instanceId&" +
-                "secret=$secret&" +
+                "pairToken=${request.pairToken}&" +
+                "deviceId=${request.instanceId}&" +
+                "secret=${request.secret}&" +
                 "format=json"
         val body = RequestBody.create(json, formContent)
-        val request = Request.Builder()
-            .url(apiUrl)
+        val httpRequest = Request.Builder()
+            .url(request.apiUrl!!)
             .post(body)
             .build()
-        val call = client.newCall(request)
+        val call = client.newCall(httpRequest)
 
         call.enqueue(RegisterCallback(callback))
     }
@@ -51,6 +53,7 @@ class MediaWikiCommunicator : Registration, LoginVerifier {
 
         inner class InvalidToken : Exception("Invalid token")
     }
+
     override fun verify(apiUrl: URL, challenge: String, response: String, cb: LoginVerifier.Callback) {
         val json = MediaType.get("application/x-www-form-urlencoded")
         val client = OkHttpClient()
@@ -84,7 +87,7 @@ class MediaWikiCommunicator : Registration, LoginVerifier {
             callback.onSuccess()
         }
 
-        inner class VerificationFailed: Exception("Login verification failed")
+        inner class VerificationFailed : Exception("Login verification failed")
     }
 }
 

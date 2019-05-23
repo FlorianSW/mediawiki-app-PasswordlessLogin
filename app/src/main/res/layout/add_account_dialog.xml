@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingStart="25dp"
+    android:paddingEnd="25dp"
+    android:paddingTop="20dp">
+
+    <LinearLayout
+        android:id="@+id/scan_qr_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <me.dm7.barcodescanner.zbar.ZBarScannerView
+            android:id="@+id/qr_scanner"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/ic_camera_black_24dp" />
+
+        <Button
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/scan_qr_code_button"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_horizontal"
+            android:text="Use QR Code"
+            android:textSize="18dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0.40"
+                android:background="@android:color/darker_gray" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.20"
+                android:gravity="center"
+                android:text="or" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0.40"
+                android:background="@android:color/darker_gray" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Account name">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/account_name"
+            android:layout_height="wrap_content" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="API URL">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/api_url"
+            android:layout_height="wrap_content" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pair Token">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/pair_token"
+            android:layout_height="wrap_content" />
+    </android.support.design.widget.TextInputLayout>
+</LinearLayout>

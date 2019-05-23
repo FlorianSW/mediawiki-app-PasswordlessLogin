@@ -1,9 +1,9 @@
 package org.droidwiki.passwordless
 
-import java.net.URL
+import org.droidwiki.passwordless.model.AccountRegistrationRequest
 
 interface Registration {
-    fun register(accountName: String, apiUrl: URL, accountToken: String, instanceId: String, secret: String, callback: Callback)
+    fun register(request: AccountRegistrationRequest, callback: Callback)
 
     interface Callback {
         fun onSuccess()
