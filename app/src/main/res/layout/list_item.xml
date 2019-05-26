@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/two_line_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:minHeight="72dp"
+    android:paddingEnd="?listPreferredItemPaddingRight"
+    android:paddingStart="?listPreferredItemPaddingLeft"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:id="@+id/lines_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_toStartOf="@+id/secondary_action"
+        android:layout_alignParentStart="true"
+        android:paddingBottom="16dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            android:id="@+id/site_name"
+            style="@style/TextAppearance.AppCompat.Body2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/api_url"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/colorSecondaryText"
+            android:singleLine="true"/>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/secondary_action"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:scaleType="centerInside"
+        android:contentDescription="Delete account"
+        android:src="@drawable/ic_delete_red_24dp"/>
+
+</RelativeLayout>

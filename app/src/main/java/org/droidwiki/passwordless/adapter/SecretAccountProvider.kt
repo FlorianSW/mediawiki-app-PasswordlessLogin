@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import org.droidwiki.passwordless.AccountsProvider
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.ACCOUNT_TABLE_NAME
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.COLUMN_API_URL
+import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.COLUMN_ID
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.COLUMN_NAME
 import org.droidwiki.passwordless.adapter.SQLiteHelper.Companion.COLUMN_SECRET
 import org.droidwiki.passwordless.model.Account
@@ -46,7 +47,7 @@ class SecretAccountProvider(private val sqLiteHelper: SQLiteHelper) : AccountsPr
     override fun list(): List<Account> {
         val readableDatabase = sqLiteHelper.readableDatabase
         val resultSet = readableDatabase.query(
-            ACCOUNT_TABLE_NAME, arrayOf(COLUMN_NAME, COLUMN_API_URL, COLUMN_SECRET), null,
+            ACCOUNT_TABLE_NAME, arrayOf(COLUMN_ID, COLUMN_NAME, COLUMN_API_URL, COLUMN_SECRET), null,
             arrayOf<String>(), null, null, null
         )
 
@@ -60,6 +61,7 @@ class SecretAccountProvider(private val sqLiteHelper: SQLiteHelper) : AccountsPr
         while (!resultSet.isAfterLast) {
             elements.add(
                 Account(
+                    resultSet.getInt(resultSet.getColumnIndex(COLUMN_ID)),
                     resultSet.getString(resultSet.getColumnIndex(COLUMN_NAME)),
                     resultSet.getString(resultSet.getColumnIndex(COLUMN_API_URL)),
                     resultSet.getString(resultSet.getColumnIndex(COLUMN_SECRET))
@@ -72,10 +74,12 @@ class SecretAccountProvider(private val sqLiteHelper: SQLiteHelper) : AccountsPr
         return elements
     }
 
+    override fun remove(id: Int) {
+        sqLiteHelper.writableDatabase.delete(ACCOUNT_TABLE_NAME, "$COLUMN_ID = '$id'", arrayOf())
+    }
+
     override fun remove(name: String) {
         sqLiteHelper.writableDatabase.delete(ACCOUNT_TABLE_NAME, "$COLUMN_NAME = '$name'", arrayOf())
-
-        KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(name)
     }
 
     override fun findByApiUrl(apiUrl: URL): Optional<Account> {

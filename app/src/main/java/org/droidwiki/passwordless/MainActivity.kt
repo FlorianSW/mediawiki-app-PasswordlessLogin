@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.provider.Settings
+import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -22,10 +23,8 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import me.dm7.barcodescanner.zbar.Result
 import me.dm7.barcodescanner.zbar.ZBarScannerView
-import org.droidwiki.passwordless.adapter.MediaWikiCommunicator
-import org.droidwiki.passwordless.adapter.SQLiteHelper
-import org.droidwiki.passwordless.adapter.SecretAccountProvider
-import org.droidwiki.passwordless.adapter.qrCodeToRegistrationRequest
+import org.droidwiki.passwordless.adapter.*
+import org.droidwiki.passwordless.model.Account
 import org.droidwiki.passwordless.model.AccountRegistrationRequest
 import java.net.URL
 
@@ -34,7 +33,8 @@ class MainActivity : AppCompatActivity() {
     private val accountsProvider: AccountsProvider = SecretAccountProvider(SQLiteHelper(this))
     private val registrationService: Registration = MediaWikiCommunicator()
 
-    private lateinit var accountListContent: ArrayAdapter<String>
+    private lateinit var accountListContent: AccountArrayAdapter
+    private lateinit var noAccountsText: TextView
     private var cameraView: ZBarScannerView? = null
     private var alertDialog: AlertDialog? = null
 
@@ -44,22 +44,23 @@ class MainActivity : AppCompatActivity() {
         ensureDeviceSecure()
 
         setContentView(R.layout.activity_main)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+
+        noAccountsText = findViewById(R.id.no_accounts_text)
+        val addAccountButton = findViewById<FloatingActionButton>(R.id.action_add)
+        addAccountButton.setOnClickListener {
+            openAddAccountDialog()
+        }
 
         val accountList = findViewById<ListView>(R.id.account_list)
-        accountListContent = ArrayAdapter(this, android.R.layout.simple_list_item_1)
-        accountList.adapter = accountListContent
-        accountList.onItemLongClickListener = object : AdapterView.OnItemLongClickListener {
-            override fun onItemLongClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long): Boolean {
-                if (view is AppCompatTextView) {
-                    accountsProvider.remove(view.text as String)
-                    reloadList()
-                    return true
-                }
-                return false
+        accountListContent = AccountArrayAdapter(this, R.layout.list_item)
+        accountListContent.setOnDeleteListener(object: AccountArrayAdapter.OnDeleteListener {
+            override fun onDelete(account: Account) {
+                accountsProvider.remove(account.id)
+                reloadList()
             }
-        }
+
+        })
+        accountList.adapter = accountListContent
 
         reloadList()
     }
@@ -99,11 +100,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
-        return true
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             50 -> {
@@ -113,12 +109,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        openAddAccountDialog()
-
-        return true
     }
 
     private fun openAddAccountDialog() {
@@ -199,9 +189,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun reloadList() {
         accountListContent.clear()
+        noAccountsText.visibility = View.GONE
 
         accountsProvider.list().forEach {
-            accountListContent.add(it.name)
+            accountListContent.add(it)
+        }
+
+        if (accountListContent.isEmpty) {
+            noAccountsText.visibility = View.VISIBLE
         }
     }
 

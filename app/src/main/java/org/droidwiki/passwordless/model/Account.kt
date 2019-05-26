@@ -4,7 +4,7 @@ import org.droidwiki.passwordless.ToHex
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-data class Account(val name: String, val apiUrl: String, private val secret: String) {
+data class Account(val id: Int, val name: String, val apiUrl: String, private val secret: String) {
     fun sign(challenge: ByteArray): String {
         val byteKey = secret.toByteArray(charset("UTF-8"))
         val hmacSha256 = "HmacSHA512"

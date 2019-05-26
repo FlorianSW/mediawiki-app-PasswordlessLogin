@@ -2,7 +2,21 @@
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/colorPrimary"
-    app:titleTextColor="@color/colorWhite"
-    android:elevation="4dp" />
+    android:background="@color/colorWhite"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MediaWiki"
+        android:textColor="@color/colorBlack"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" Passwordless Login"
+        android:textColor="@color/colorBlack"
+        android:textSize="20sp"
+        />
+</android.support.v7.widget.Toolbar>

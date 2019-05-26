@@ -60,11 +60,23 @@ class SecretAccountProviderTest {
     }
 
     @Test
-    fun removes_entry() {
+    fun removes_entry_by_name() {
         val apiUrl = URL("https://localhost/w/api.php")
         provider.create("A_NAME", apiUrl)
 
         provider.remove("A_NAME")
+
+        assertEquals(0, provider.list().size)
+        assertEquals(0, keyStoreSize())
+    }
+
+    @Test
+    fun removes_entry_by_id() {
+        val apiUrl = URL("https://localhost/w/api.php")
+        provider.create("A_NAME", apiUrl)
+        val account = provider.findByApiUrl(apiUrl).get()
+
+        provider.remove(account.id)
 
         assertEquals(0, provider.list().size)
         assertEquals(0, keyStoreSize())
