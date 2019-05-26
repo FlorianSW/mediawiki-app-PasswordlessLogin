@@ -8,11 +8,13 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.provider.Settings
 import android.support.design.widget.BottomNavigationView
+import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.view.animation.AnimationUtils
 import android.widget.*
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity(), AccountListFragment.AccountListListene
     private val accountsProvider: AccountsProvider = SecretAccountProvider(SQLiteHelper(this))
     private val registrationService: Registration = MediaWikiCommunicator()
     private lateinit var accountListFragment: AccountListFragment
+    private lateinit var addAccountButton: FloatingActionButton
 
     private var cameraView: ZBarScannerView? = null
     private var alertDialog: AlertDialog? = null
@@ -37,6 +40,12 @@ class MainActivity : AppCompatActivity(), AccountListFragment.AccountListListene
         ensureDeviceSecure()
 
         setContentView(R.layout.activity_main)
+
+        addAccountButton = findViewById(R.id.action_add)
+        addAccountButton.setOnClickListener {
+            openAddAccountDialog()
+        }
+
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.navigation)
         bottomNavigationView.setOnNavigationItemSelectedListener {
             onNavigation(it.itemId)
@@ -50,9 +59,15 @@ class MainActivity : AppCompatActivity(), AccountListFragment.AccountListListene
         if (itemId == R.id.action_accounts) {
             accountListFragment = AccountListFragment.newInstance()
             newFragment = accountListFragment
+            val scaleUp = AnimationUtils.loadAnimation(this, R.anim.scale_up)
+            addAccountButton.startAnimation(scaleUp)
+            addAccountButton.show()
         }
         if (itemId == R.id.action_app_info) {
             newFragment = AboutFragment()
+            val scaleDown = AnimationUtils.loadAnimation(this, R.anim.scale_down)
+            addAccountButton.startAnimation(scaleDown)
+            addAccountButton.hide()
         }
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.content, newFragment!!)
@@ -81,7 +96,7 @@ class MainActivity : AppCompatActivity(), AccountListFragment.AccountListListene
             lockScreenInfo.orientation = LinearLayout.VERTICAL
 
             val infoText = TextView(this)
-            infoText.text = "You need to setup a screen lock in order to use this app."
+            infoText.text = getString(R.string.screen_lock_required)
             lockScreenInfo.addView(infoText)
 
             val dialog = AlertDialog.Builder(this)

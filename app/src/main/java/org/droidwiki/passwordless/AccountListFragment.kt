@@ -12,7 +12,6 @@ import android.widget.TextView
 import org.droidwiki.passwordless.adapter.AccountArrayAdapter
 import org.droidwiki.passwordless.model.Account
 
-
 class AccountListFragment : Fragment() {
     private var listener: AccountListListener? = null
     private var noAccountsText: TextView? = null
@@ -37,10 +36,6 @@ class AccountListFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_account_list, container, false)
         noAccountsText = view.findViewById(R.id.no_accounts_text)
-        val addAccountButton = view.findViewById<FloatingActionButton>(R.id.action_add)
-        addAccountButton.setOnClickListener {
-            listener?.openAddAccountDialog()
-        }
 
         val accountList = view.findViewById<ListView>(R.id.account_list)
         accountListContent = AccountArrayAdapter(context!!, R.layout.list_item)
