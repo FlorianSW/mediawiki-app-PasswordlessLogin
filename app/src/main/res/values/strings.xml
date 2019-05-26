@@ -4,7 +4,7 @@
 
     <!-- App toolbar header -->
     <string name="mediawiki" translatable="false">MediaWiki</string>
-    <string name="passwordless_login" translatable="false"> Passwordless Login</string>
+    <string name="passwordless_login" translatable="false">&#160;Passwordless Login</string>
 
     <!-- Login confirmation activity -->
     <string name="login_request">Are you trying to login to the following MediaWiki site?</string>
