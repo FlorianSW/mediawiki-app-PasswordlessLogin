@@ -7,7 +7,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MediaWiki"
+        android:text="@string/mediawiki"
         android:textColor="@color/colorBlack"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -15,7 +15,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=" Passwordless Login"
+        android:text="@string/passwordless_login"
         android:textColor="@color/colorBlack"
         android:textSize="20sp"
         />

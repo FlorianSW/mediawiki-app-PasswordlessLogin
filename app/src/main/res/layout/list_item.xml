@@ -47,7 +47,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:scaleType="centerInside"
-        android:contentDescription="Delete account"
+        android:contentDescription="@string/list_delete_account"
         android:src="@drawable/ic_delete_red_24dp"/>
 
 </RelativeLayout>

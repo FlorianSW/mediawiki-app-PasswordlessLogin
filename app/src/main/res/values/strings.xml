@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">MediaWiki Passwordless Login</string>
+
+    <!-- App toolbar header -->
+    <string name="mediawiki" translatable="false">MediaWiki</string>
+    <string name="passwordless_login" translatable="false"> Passwordless Login</string>
+
+    <!-- Login confirmation activity -->
+    <string name="login_request">Are you trying to login to the following MediaWiki site?</string>
+    <string name="login_decline">No</string>
+    <string name="login_accept">Yes</string>
+
+    <!-- Add account dialog -->
+    <string name="register_qr_code_button">Use QR Code</string>
+    <string name="register_alternative_divider">or</string>
+    <string name="register_account_name">Account name</string>
+    <string name="register_api_url">API URL</string>
+    <string name="register_pair_token">Pair token</string>
+
+    <!-- List accounts -->
+    <string name="list_no_accounts">No accounts added, yet.</string>
+    <string name="list_delete_account">Delete account</string>
 </resources>

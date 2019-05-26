@@ -32,8 +32,8 @@
             android:id="@+id/scan_qr_code_button"
             android:layout_marginBottom="20dp"
             android:gravity="center_horizontal"
-            android:text="Use QR Code"
-            android:textSize="18dp" />
+            android:text="@string/register_qr_code_button"
+            android:textSize="18sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.20"
                 android:gravity="center"
-                android:text="or" />
+                android:text="@string/register_alternative_divider" />
 
             <View
                 android:layout_width="0dp"
@@ -67,18 +67,19 @@
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Account name">
+        android:hint="@string/register_account_name">
 
         <EditText
             android:layout_width="match_parent"
             android:id="@+id/account_name"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="API URL">
+        android:hint="@string/register_api_url">
 
         <EditText
             android:layout_width="match_parent"
@@ -89,7 +90,7 @@
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Pair Token">
+        android:hint="@string/register_pair_token">
 
         <EditText
             android:layout_width="match_parent"

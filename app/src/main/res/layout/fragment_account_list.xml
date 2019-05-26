@@ -7,7 +7,6 @@
     tools:context=".AccountListFragment">
 
     <ListView
-        android:layout_below="@+id/toolbar"
         android:id="@+id/account_list"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -22,7 +21,7 @@
         android:textSize="16sp"
         android:textColor="@color/colorSecondaryText"
         android:visibility="gone"
-        android:text="No accounts added, yet."
+        android:text="@string/list_no_accounts"
         />
 
     <android.support.design.widget.FloatingActionButton
