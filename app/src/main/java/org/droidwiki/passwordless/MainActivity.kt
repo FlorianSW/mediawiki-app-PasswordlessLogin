@@ -7,34 +7,27 @@ import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.provider.Settings
-import android.support.design.widget.FloatingActionButton
+import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.ActivityCompat
+import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.AppCompatTextView
-import android.support.v7.widget.Toolbar
-import android.text.SpannableStringBuilder
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
 import android.widget.*
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import me.dm7.barcodescanner.zbar.Result
 import me.dm7.barcodescanner.zbar.ZBarScannerView
 import org.droidwiki.passwordless.adapter.*
-import org.droidwiki.passwordless.model.Account
 import org.droidwiki.passwordless.model.AccountRegistrationRequest
 import java.net.URL
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), AccountListFragment.AccountListListener {
     private val accountsProvider: AccountsProvider = SecretAccountProvider(SQLiteHelper(this))
     private val registrationService: Registration = MediaWikiCommunicator()
+    private lateinit var accountListFragment: AccountListFragment
 
-    private lateinit var accountListContent: AccountArrayAdapter
-    private lateinit var noAccountsText: TextView
     private var cameraView: ZBarScannerView? = null
     private var alertDialog: AlertDialog? = null
 
@@ -44,25 +37,26 @@ class MainActivity : AppCompatActivity() {
         ensureDeviceSecure()
 
         setContentView(R.layout.activity_main)
-
-        noAccountsText = findViewById(R.id.no_accounts_text)
-        val addAccountButton = findViewById<FloatingActionButton>(R.id.action_add)
-        addAccountButton.setOnClickListener {
-            openAddAccountDialog()
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.navigation)
+        bottomNavigationView.setOnNavigationItemSelectedListener {
+            onNavigation(it.itemId)
+            true
         }
+        bottomNavigationView.selectedItemId = R.id.action_accounts
+    }
 
-        val accountList = findViewById<ListView>(R.id.account_list)
-        accountListContent = AccountArrayAdapter(this, R.layout.list_item)
-        accountListContent.setOnDeleteListener(object: AccountArrayAdapter.OnDeleteListener {
-            override fun onDelete(account: Account) {
-                accountsProvider.remove(account.id)
-                reloadList()
-            }
-
-        })
-        accountList.adapter = accountListContent
-
-        reloadList()
+    private fun onNavigation(itemId: Int) {
+        var newFragment: Fragment? = null
+        if (itemId == R.id.action_accounts) {
+            accountListFragment = AccountListFragment.newInstance()
+            newFragment = accountListFragment
+        }
+        if (itemId == R.id.action_app_info) {
+            newFragment = AboutFragment()
+        }
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.content, newFragment!!)
+        fragmentTransaction.commit()
     }
 
     override fun onPause() {
@@ -74,6 +68,10 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         cameraView?.setResultHandler(QRResultHandler())
         cameraView?.startCamera()
+    }
+
+    override fun accountsProvider(): AccountsProvider {
+        return accountsProvider
     }
 
     private fun ensureDeviceSecure() {
@@ -111,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openAddAccountDialog() {
+    override fun openAddAccountDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Add a new MediaWiki site")
         builder.setView(R.layout.add_account_dialog)
@@ -187,19 +185,6 @@ class MainActivity : AppCompatActivity() {
         scannerView.startCamera()
     }
 
-    private fun reloadList() {
-        accountListContent.clear()
-        noAccountsText.visibility = View.GONE
-
-        accountsProvider.list().forEach {
-            accountListContent.add(it)
-        }
-
-        if (accountListContent.isEmpty) {
-            noAccountsText.visibility = View.VISIBLE
-        }
-    }
-
     inner class RegisterCallback(private val alertDialog: AlertDialog, private val accountName: String) :
         Registration.Callback {
         override fun onFailure(e: Exception) {
@@ -212,7 +197,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onSuccess() {
             runOnUiThread {
-                reloadList()
+                accountListFragment.reloadList()
                 alertDialog.dismiss()
             }
         }

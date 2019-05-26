@@ -10,38 +10,24 @@
         layout="@layout/toolbar"
         />
 
-    <ListView
+    <FrameLayout
+        android:layout_below="@id/toolbar"
         android:layout_marginTop="24dp"
-        android:layout_below="@+id/toolbar"
-        android:id="@+id/account_list"
-        android:layout_width="wrap_content"
+        android:id="@+id/content"
+        android:layout_gravity="top"
         android:layout_height="match_parent"
-        android:footerDividersEnabled="false"
-        />
-
-    <TextView
-        android:id="@+id/no_accounts_text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="16sp"
-        android:textColor="@color/colorSecondaryText"
-        android:visibility="gone"
-        android:text="No accounts added, yet."
+        android:layout_marginBottom="56dp"
         />
 
-    <android.support.design.widget.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:id="@+id/action_add"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_add_white_24dp"
+    <android.support.design.widget.BottomNavigationView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/navigation"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:backgroundTint="@color/colorPrimary"
-        app:borderWidth="0dp"
-        android:clickable="true"
-        app:elevation="6dp"/>
-
+        app:menu="@menu/navigation_items" />
 </RelativeLayout >
