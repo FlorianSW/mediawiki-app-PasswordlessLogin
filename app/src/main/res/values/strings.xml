@@ -7,6 +7,8 @@
     <string name="passwordless_login" translatable="false">&#160;Passwordless Login</string>
 
     <!-- Login confirmation activity -->
+    <string name="login_notification_title">Login request received</string>
+    <string name="login_notification_body">Please review a login request for one of your accounts</string>
     <string name="login_request">Are you trying to login to the following MediaWiki site?</string>
     <string name="login_decline">No</string>
     <string name="login_accept">Yes</string>
@@ -21,4 +23,8 @@
     <!-- List accounts -->
     <string name="list_no_accounts">No accounts added, yet.</string>
     <string name="list_delete_account">Delete account</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_login_requests">Login requests</string>
+    <string name="notification_channel_login_requests_description">Notifies about new login requests into registered accounts.</string>
 </resources>

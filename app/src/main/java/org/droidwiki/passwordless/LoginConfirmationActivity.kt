@@ -1,11 +1,14 @@
 package org.droidwiki.passwordless
 
+import android.app.NotificationManager
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import org.droidwiki.passwordless.adapter.MediaWikiCommunicator
+import org.droidwiki.passwordless.adapter.NOTIFICATION_ID
 import org.droidwiki.passwordless.adapter.SQLiteHelper
 import org.droidwiki.passwordless.adapter.SecretAccountProvider
 import org.droidwiki.passwordless.model.Account
@@ -41,7 +44,7 @@ class LoginConfirmationActivity : AppCompatActivity() {
         }
     }
 
-    inner class VerifyLoginCallback: LoginVerifier.Callback {
+    inner class VerifyLoginCallback : LoginVerifier.Callback {
         override fun onSuccess() {
             finish()
         }
@@ -51,5 +54,11 @@ class LoginConfirmationActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginConfirmationActivity, "Login verification failed.", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    override fun finish() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
+        super.finish()
     }
 }
