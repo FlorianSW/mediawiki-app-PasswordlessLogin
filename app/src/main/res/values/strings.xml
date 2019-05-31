@@ -12,6 +12,7 @@
     <string name="login_request">Are you trying to login to the following MediaWiki site?</string>
     <string name="login_decline">No</string>
     <string name="login_accept">Yes</string>
+    <string name="login_submit_wait">Logging you in</string>
 
     <!-- Add account dialog -->
     <string name="register_qr_code_button">Use QR Code</string>

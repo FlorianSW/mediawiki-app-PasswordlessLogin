@@ -11,8 +11,7 @@
         android:layout_width="match_parent"
         android:src="@drawable/ic_person_black_24dp"
         android:layout_height="85dp"
-        android:layout_marginTop="50dp"
-        />
+        android:layout_marginTop="50dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -28,8 +27,7 @@
         android:id="@+id/account_name"
         android:textColor="@color/colorBlack"
         android:layout_marginTop="25dp"
-        android:textSize="25sp"
-        />
+        android:textSize="25sp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -58,5 +56,27 @@
             android:textColor="@color/colorConstructive" />
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/loading"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical"
+        >
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:indeterminateTint="@color/colorPrimary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/login_submit_wait"
+            android:textColor="@color/colorSecondaryText"
+            />
+    </LinearLayout>
 
 </LinearLayout>

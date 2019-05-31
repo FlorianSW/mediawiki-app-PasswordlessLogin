@@ -4,7 +4,9 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import org.droidwiki.passwordless.adapter.MediaWikiCommunicator
@@ -18,8 +20,14 @@ class LoginConfirmationActivity : AppCompatActivity() {
     private val accountsProvider: AccountsProvider = SecretAccountProvider(SQLiteHelper(this))
     private val loginVerifier: LoginVerifier = MediaWikiCommunicator()
 
+    private var disabledColor: Int = 0
+    private var constructiveColor: Int = 0
+    private var destructiveColor: Int = 0
     private lateinit var account: Account
     private lateinit var challenge: String
+    private lateinit var confirmLogin: Button
+    private lateinit var declineLogin: Button
+    private lateinit var loading: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,14 +42,32 @@ class LoginConfirmationActivity : AppCompatActivity() {
         }
         account = result.get()
 
+        disabledColor = resources.getColor(R.color.colorSecondaryText, null)
+        constructiveColor = resources.getColor(R.color.colorConstructive, null)
+        destructiveColor = resources.getColor(R.color.colorDesctructive, null)
+
         findViewById<TextView>(R.id.account_name).text = account.name
-        findViewById<Button>(R.id.button_no).setOnClickListener {
+        declineLogin = findViewById(R.id.button_no)
+        confirmLogin = findViewById(R.id.button_yes)
+        loading = findViewById(R.id.loading)
+
+        declineLogin.setOnClickListener {
+            onButtonPressed()
             finish()
         }
-        findViewById<Button>(R.id.button_yes).setOnClickListener {
+        confirmLogin.setOnClickListener {
+            onButtonPressed()
+            loading.visibility = View.VISIBLE
             val response = account.sign(challenge.toByteArray())
             loginVerifier.verify(URL(account.apiUrl), challenge, response, VerifyLoginCallback())
         }
+    }
+
+    private fun onButtonPressed() {
+        declineLogin.setTextColor(disabledColor)
+        declineLogin.isEnabled = false
+        confirmLogin.setTextColor(disabledColor)
+        confirmLogin.isEnabled = false
     }
 
     inner class VerifyLoginCallback : LoginVerifier.Callback {
@@ -51,6 +77,11 @@ class LoginConfirmationActivity : AppCompatActivity() {
 
         override fun onFailure(e: Exception) {
             runOnUiThread {
+                loading.visibility = View.GONE
+                declineLogin.setTextColor(destructiveColor)
+                declineLogin.isEnabled = true
+                confirmLogin.setTextColor(constructiveColor)
+                confirmLogin.isEnabled = true
                 Toast.makeText(this@LoginConfirmationActivity, "Login verification failed.", Toast.LENGTH_LONG).show()
             }
         }
