@@ -21,7 +21,6 @@ import org.droidwiki.passwordless.adapter.*
 import org.droidwiki.passwordless.model.Account
 import org.droidwiki.passwordless.model.AccountRegistrationRequest
 import java.net.URL
-import kotlin.experimental.and
 
 class AccountListFragment : Fragment() {
     private var noAccountsText: TextView? = null
@@ -186,7 +185,8 @@ class AccountListFragment : Fragment() {
             accountsProvider.remove(accountName)
             cameraView?.startCamera()
             activity?.runOnUiThread {
-                Toast.makeText(context, getString(R.string.register_registration_failed, e.message), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.register_registration_failed, e.message), Toast.LENGTH_LONG)
+                    .show()
             }
         }
 
@@ -212,7 +212,8 @@ class AccountListFragment : Fragment() {
                     doRegisterAccount(request)
                 } else {
                     activity?.runOnUiThread {
-                        Toast.makeText(context, getString(R.string.register_qr_code_format_error), Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, getString(R.string.register_qr_code_format_error), Toast.LENGTH_LONG)
+                            .show()
                     }
                     cameraView?.resumeCameraPreview(this)
                 }
