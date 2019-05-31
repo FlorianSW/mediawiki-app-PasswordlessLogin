@@ -59,7 +59,7 @@ class MediaWikiCommunicator : Registration, LoginVerifier {
         val client = OkHttpClient()
         val formContent = "action=passwordlesslogin-verify&" +
                 "challenge=$challenge&" +
-                "response=${response.toLowerCase()}&" +
+                "response=$response&" +
                 "format=json"
         val body = RequestBody.create(json, formContent)
         val request = Request.Builder()

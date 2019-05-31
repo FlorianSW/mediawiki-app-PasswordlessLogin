@@ -21,6 +21,7 @@ import org.droidwiki.passwordless.adapter.*
 import org.droidwiki.passwordless.model.Account
 import org.droidwiki.passwordless.model.AccountRegistrationRequest
 import java.net.URL
+import kotlin.experimental.and
 
 class AccountListFragment : Fragment() {
     private var noAccountsText: TextView? = null
@@ -98,20 +99,13 @@ class AccountListFragment : Fragment() {
                 val accountToken = token!!.text.toString()
                 val secret = accountsProvider.create(name, apiURL)
 
-                val request = AccountRegistrationRequest(
-                    name,
-                    apiURL,
-                    accountToken,
-                    it,
-                    secret
-                )
-                doRegisterAccount(request)
+                doRegisterAccount(AccountRegistrationRequest(name, apiURL, accountToken, it, secret))
             }
         }
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         val scaleDown = AnimationUtils.loadAnimation(context, R.anim.scale_down)
         addAccountButton.startAnimation(scaleDown)
         addAccountButton.hide()
