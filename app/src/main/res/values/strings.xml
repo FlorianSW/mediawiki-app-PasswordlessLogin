@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">MediaWiki Passwordless Login</string>
+    <string name="screen_lock_required_title">Screen lock required</string>
+    <string name="screen_lock_settings_button">Setup</string>
     <string name="screen_lock_required">You need to setup a screen lock in order to use this app.</string>
 
     <!-- App toolbar header -->

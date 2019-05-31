@@ -9,11 +9,10 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.widget.LinearLayout
-import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var accountListFragment: AccountListFragment
+    private var screenLockRequiredDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +27,12 @@ class MainActivity : AppCompatActivity() {
             true
         }
         bottomNavigationView.selectedItemId = R.id.action_accounts
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        screenLockRequiredDialog?.dismiss()
+        ensureDeviceSecure()
     }
 
     private fun onNavigation(itemId: Int) {
@@ -47,22 +52,15 @@ class MainActivity : AppCompatActivity() {
     private fun ensureDeviceSecure() {
         val keyGuard = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         if (!keyGuard.isDeviceSecure) {
-            val lockScreenInfo = LinearLayout(this)
-            lockScreenInfo.orientation = LinearLayout.VERTICAL
-
-            val infoText = TextView(this)
-            infoText.text = getString(R.string.screen_lock_required)
-            lockScreenInfo.addView(infoText)
-
-            val dialog = AlertDialog.Builder(this)
-                .setTitle("Screen lock required")
-                .setPositiveButton("Setup") { _, _ -> run {} }
-                .setView(lockScreenInfo)
+            screenLockRequiredDialog = AlertDialog.Builder(this)
+                .setTitle(getString(R.string.screen_lock_required_title))
+                .setPositiveButton(getString(R.string.screen_lock_settings_button)) { _, _ -> run {} }
+                .setView(R.layout.screen_lock_required_dialog)
                 .setCancelable(false)
                 .create()
 
-            dialog.show()
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            screenLockRequiredDialog?.show()
+            screenLockRequiredDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
                 startActivityForResult(Intent(Settings.ACTION_SETTINGS), 0)
             }
         }
