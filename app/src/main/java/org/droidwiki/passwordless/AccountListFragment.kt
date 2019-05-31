@@ -74,6 +74,7 @@ class AccountListFragment : Fragment() {
     }
 
     private fun openAddAccountDialog() {
+        alertDialog?.dismiss()
         val builder = AlertDialog.Builder(context!!)
         builder.setTitle(getString(R.string.register_title))
         builder.setView(R.layout.add_account_dialog)
