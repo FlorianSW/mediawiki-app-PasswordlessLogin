@@ -1,27 +1,42 @@
 package org.droidwiki.passwordless
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
-import android.widget.TextView
-import org.droidwiki.passwordless.adapter.AccountArrayAdapter
+import android.view.animation.AnimationUtils
+import android.widget.*
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.iid.FirebaseInstanceId
+import me.dm7.barcodescanner.zbar.Result
+import me.dm7.barcodescanner.zbar.ZBarScannerView
+import org.droidwiki.passwordless.adapter.*
 import org.droidwiki.passwordless.model.Account
+import org.droidwiki.passwordless.model.AccountRegistrationRequest
+import java.net.URL
 
 class AccountListFragment : Fragment() {
-    private var listener: AccountListListener? = null
     private var noAccountsText: TextView? = null
+    private var cameraView: ZBarScannerView? = null
+    private var alertDialog: AlertDialog? = null
+
     private lateinit var accountListContent: AccountArrayAdapter
+    private lateinit var accountsProvider: AccountsProvider
+    private val registrationService: Registration = MediaWikiCommunicator()
+    private lateinit var addAccountButton: FloatingActionButton
 
     fun reloadList() {
         accountListContent.clear()
         noAccountsText?.visibility = View.GONE
 
-        listener?.accountsProvider()?.list()?.forEach {
+        accountsProvider.list().forEach {
             accountListContent.add(it)
         }
 
@@ -41,24 +56,172 @@ class AccountListFragment : Fragment() {
         accountListContent = AccountArrayAdapter(context!!, R.layout.list_item)
         accountListContent.setOnDeleteListener(object : AccountArrayAdapter.OnDeleteListener {
             override fun onDelete(account: Account) {
-                listener?.accountsProvider()?.remove(account.id)
+                accountsProvider.remove(account.id)
                 reloadList()
             }
 
         })
         accountList?.adapter = accountListContent
+        addAccountButton = view.findViewById(R.id.action_add)
+        addAccountButton.setOnClickListener {
+            openAddAccountDialog()
+        }
 
         reloadList()
 
         return view
     }
 
+    private fun openAddAccountDialog() {
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle("Add a new MediaWiki site")
+        builder.setView(R.layout.add_account_dialog)
+        builder.setPositiveButton("Register") { _, _ -> run {} }
+        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        alertDialog = builder.create()
+        alertDialog?.show()
+
+        val accountName = alertDialog?.findViewById<EditText>(R.id.account_name)
+        val apiUrl = alertDialog?.findViewById<EditText>(R.id.api_url)
+
+        val token = alertDialog?.findViewById<EditText>(R.id.pair_token)
+
+        val qrCodeButton = alertDialog?.findViewById<Button>(R.id.scan_qr_code_button)
+        qrCodeButton!!.setOnClickListener {
+            onQrCodeButtonClicked(alertDialog?.findViewById(R.id.qr_scanner)!!)
+        }
+
+        alertDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+            onFirebaseInstanceId {
+                val apiURL = URL(apiUrl!!.text.toString())
+                val name = accountName!!.text.toString()
+                val accountToken = token!!.text.toString()
+                val secret = accountsProvider.create(name, apiURL)
+
+                val request = AccountRegistrationRequest(
+                    name,
+                    apiURL,
+                    accountToken,
+                    it,
+                    secret
+                )
+                doRegisterAccount(request)
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val scaleDown = AnimationUtils.loadAnimation(context, R.anim.scale_down)
+        addAccountButton.startAnimation(scaleDown)
+        addAccountButton.hide()
+        cameraView?.stopCamera()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val scaleUp = AnimationUtils.loadAnimation(context, R.anim.scale_up)
+        addAccountButton.startAnimation(scaleUp)
+        addAccountButton.show()
+        cameraView?.setResultHandler(QRResultHandler())
+        cameraView?.startCamera()
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is AccountListListener) {
-            listener = context
-        } else {
-            throw RuntimeException("$context must implement OnFragmentInteractionListener")
+        accountsProvider = SecretAccountProvider(SQLiteHelper(context))
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            50 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openAddAccountDialog()
+                    onQrCodeButtonClicked(alertDialog?.findViewById(R.id.qr_scanner)!!)
+                }
+            }
+        }
+    }
+
+    private fun onFirebaseInstanceId(action: (instanceId: String) -> Unit) {
+        FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isComplete) {
+                activity?.runOnUiThread {
+                    Toast.makeText(context, "Could not get Instance ID", Toast.LENGTH_LONG).show()
+                }
+                return@OnCompleteListener
+            }
+            val instanceId = task.result!!.token
+
+            action(instanceId)
+        })
+    }
+
+    private fun doRegisterAccount(request: AccountRegistrationRequest) {
+        if (!request.isComplete()) {
+            activity?.runOnUiThread {
+                Toast.makeText(context, "You need to fill out all fields", Toast.LENGTH_LONG).show()
+            }
+            return
+        }
+        registrationService.register(
+            request,
+            RegisterCallback(alertDialog!!, request.accountName!!)
+        )
+    }
+
+    private fun onQrCodeButtonClicked(scannerView: ZBarScannerView) {
+        if (ContextCompat.checkSelfPermission(
+                context!!,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), 50)
+            return
+        }
+
+        cameraView = scannerView
+        scannerView.setResultHandler(QRResultHandler())
+        scannerView.startCamera()
+    }
+
+    inner class RegisterCallback(private val alertDialog: AlertDialog, private val accountName: String) :
+        Registration.Callback {
+        override fun onFailure(e: Exception) {
+            accountsProvider.remove(accountName)
+            cameraView?.startCamera()
+            activity?.runOnUiThread {
+                Toast.makeText(context, "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        override fun onSuccess() {
+            activity?.runOnUiThread {
+                reloadList()
+                alertDialog.dismiss()
+            }
+        }
+    }
+
+    inner class QRResultHandler : ZBarScannerView.ResultHandler {
+        override fun handleResult(rawResult: Result) {
+            onFirebaseInstanceId {
+                val request = qrCodeToRegistrationRequest(rawResult)
+                val intermediateSecret = "INTERMEDIATE_SECRET"
+                request.secret = intermediateSecret
+                request.instanceId = it
+                if (request.isComplete()) {
+                    cameraView?.stopCamera()
+                    val secret = accountsProvider.create(request.accountName!!, request.apiUrl!!)
+                    request.secret = secret
+                    doRegisterAccount(request)
+                } else {
+                    activity?.runOnUiThread {
+                        Toast.makeText(context, "Not a valid Pair QR Code", Toast.LENGTH_LONG).show()
+                    }
+                    cameraView?.resumeCameraPreview(this)
+                }
+            }
         }
     }
 
