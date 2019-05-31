@@ -74,10 +74,10 @@ class AccountListFragment : Fragment() {
 
     private fun openAddAccountDialog() {
         val builder = AlertDialog.Builder(context!!)
-        builder.setTitle("Add a new MediaWiki site")
+        builder.setTitle(getString(R.string.register_title))
         builder.setView(R.layout.add_account_dialog)
-        builder.setPositiveButton("Register") { _, _ -> run {} }
-        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        builder.setPositiveButton(getString(R.string.register_positive)) { _, _ -> run {} }
+        builder.setNegativeButton(getString(R.string.register_negative)) { dialog, _ -> dialog.cancel() }
         alertDialog = builder.create()
         alertDialog?.show()
 
@@ -147,7 +147,7 @@ class AccountListFragment : Fragment() {
         FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isComplete) {
                 activity?.runOnUiThread {
-                    Toast.makeText(context, "Could not get Instance ID", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, getString(R.string.register_firebase_error), Toast.LENGTH_LONG).show()
                 }
                 return@OnCompleteListener
             }
@@ -160,7 +160,7 @@ class AccountListFragment : Fragment() {
     private fun doRegisterAccount(request: AccountRegistrationRequest) {
         if (!request.isComplete()) {
             activity?.runOnUiThread {
-                Toast.makeText(context, "You need to fill out all fields", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.register_mandatory_fields_missing), Toast.LENGTH_LONG).show()
             }
             return
         }
@@ -191,7 +191,7 @@ class AccountListFragment : Fragment() {
             accountsProvider.remove(accountName)
             cameraView?.startCamera()
             activity?.runOnUiThread {
-                Toast.makeText(context, "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.register_registration_failed, e.message), Toast.LENGTH_LONG).show()
             }
         }
 
@@ -217,17 +217,12 @@ class AccountListFragment : Fragment() {
                     doRegisterAccount(request)
                 } else {
                     activity?.runOnUiThread {
-                        Toast.makeText(context, "Not a valid Pair QR Code", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, getString(R.string.register_qr_code_format_error), Toast.LENGTH_LONG).show()
                     }
                     cameraView?.resumeCameraPreview(this)
                 }
             }
         }
-    }
-
-    interface AccountListListener {
-        fun openAddAccountDialog()
-        fun accountsProvider(): AccountsProvider
     }
 
     companion object {

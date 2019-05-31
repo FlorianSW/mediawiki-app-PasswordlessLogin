@@ -15,7 +15,14 @@
     <string name="login_submit_wait">Logging you in</string>
 
     <!-- Add account dialog -->
+    <string name="register_title">Add a new MediaWiki site</string>
+    <string name="register_positive">Register</string>
+    <string name="register_negative">Cancel</string>
+    <string name="register_firebase_error">There was an error setting up a communication channel for your device. Please try again later.</string>
+    <string name="register_mandatory_fields_missing">You need to fill out all required fields.</string>
+    <string name="register_registration_failed">The registration failed. Error: %s</string>
     <string name="register_qr_code_button">Use QR Code</string>
+    <string name="register_qr_code_format_error">The QR Code does not contain all required data.</string>
     <string name="register_alternative_divider">or</string>
     <string name="register_account_name">Account name</string>
     <string name="register_api_url">API URL</string>
