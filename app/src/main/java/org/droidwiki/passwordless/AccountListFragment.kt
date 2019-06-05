@@ -8,6 +8,8 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,7 +42,7 @@ class AccountListFragment : Fragment() {
             accountListContent.add(it)
         }
 
-        if (accountListContent.isEmpty) {
+        if (accountListContent.isEmpty()) {
             noAccountsText?.visibility = View.VISIBLE
         }
     }
@@ -52,16 +54,19 @@ class AccountListFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_account_list, container, false)
         noAccountsText = view.findViewById(R.id.no_accounts_text)
 
-        val accountList = view.findViewById<ListView>(R.id.account_list)
-        accountListContent = AccountArrayAdapter(context!!, R.layout.list_item)
-        accountListContent.setOnDeleteListener(object : AccountArrayAdapter.OnDeleteListener {
+        val viewManager = GridLayoutManager(context, 2)
+        accountListContent = AccountArrayAdapter(object : AccountArrayAdapter.OnDeleteListener {
             override fun onDelete(account: Account) {
                 accountsProvider.remove(account.id)
                 reloadList()
             }
-
         })
-        accountList?.adapter = accountListContent
+
+        view.findViewById<RecyclerView>(R.id.account_list).apply {
+            layoutManager = viewManager
+            adapter = accountListContent
+        }
+
         addAccountButton = view.findViewById(R.id.action_add)
         addAccountButton.setOnClickListener {
             openAddAccountDialog()
