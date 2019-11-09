@@ -57,7 +57,7 @@ class MediaWikiCommunicator : Registration, LoginVerifier {
     override fun verify(apiUrl: URL, challenge: String, response: String, cb: LoginVerifier.Callback) {
         val json = MediaType.get("application/x-www-form-urlencoded")
         val client = OkHttpClient()
-        val formContent = "action=passwordlesslogin-verify&" +
+        val formContent = "action=passwordlesslogin-verify-challenge&" +
                 "challenge=$challenge&" +
                 "response=$response&" +
                 "format=json"
