@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "829317666886",
+    "firebase_url": "https://api-project-829317666886.firebaseio.com",
+    "project_id": "api-project-829317666886",
+    "storage_bucket": "api-project-829317666886.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829317666886:android:ffc80b315902854d5f5247",
+        "android_client_info": {
+          "package_name": "org.droidwiki.passwordless"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "829317666886-ok51vjsv8plmibp64qst0i1uermu5d3b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXjYvrjrg87KWraT_nFh0TB2s8gIZlAOM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "829317666886-ok51vjsv8plmibp64qst0i1uermu5d3b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

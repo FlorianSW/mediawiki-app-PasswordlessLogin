@@ -4,12 +4,12 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +24,7 @@ import org.droidwiki.passwordless.model.Account
 import org.droidwiki.passwordless.model.AccountRegistrationRequest
 import java.net.URL
 
-class AccountListFragment : Fragment() {
+class AccountListFragment : androidx.fragment.app.Fragment() {
     private var noAccountsText: TextView? = null
     private var cameraView: ZBarScannerView? = null
     private var alertDialog: AlertDialog? = null
@@ -54,7 +54,7 @@ class AccountListFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_account_list, container, false)
         noAccountsText = view.findViewById(R.id.no_accounts_text)
 
-        val viewManager = GridLayoutManager(context, 2)
+        val viewManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
         accountListContent = AccountArrayAdapter(object : AccountArrayAdapter.OnDeleteListener {
             override fun onDelete(account: Account) {
                 accountsProvider.remove(account.id)
@@ -62,7 +62,7 @@ class AccountListFragment : Fragment() {
             }
         })
 
-        view.findViewById<RecyclerView>(R.id.account_list).apply {
+        view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.account_list).apply {
             layoutManager = viewManager
             adapter = accountListContent
         }

@@ -5,10 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
-import android.support.design.widget.BottomNavigationView
-import android.support.v4.app.Fragment
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var accountListFragment: AccountListFragment
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onNavigation(itemId: Int) {
-        var newFragment: Fragment? = null
+        var newFragment: androidx.fragment.app.Fragment? = null
         if (itemId == R.id.action_accounts) {
             accountListFragment = AccountListFragment.newInstance()
             newFragment = accountListFragment

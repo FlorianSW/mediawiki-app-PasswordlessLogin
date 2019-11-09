@@ -1,7 +1,7 @@
 package org.droidwiki.passwordless.adapter
 
-import android.support.v7.widget.CardView
-import android.support.v7.widget.RecyclerView
+import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -14,11 +14,11 @@ class AccountArrayAdapter(
     private val onDeleteListener: OnDeleteListener,
     private val accounts: MutableList<Account> = mutableListOf()
 ) :
-    RecyclerView.Adapter<AccountArrayAdapter.ViewHolder>() {
+    androidx.recyclerview.widget.RecyclerView.Adapter<AccountArrayAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val listItem = LayoutInflater.from(parent.context)
-            .inflate(R.layout.card_item, parent, false) as CardView
+            .inflate(R.layout.card_item, parent, false) as androidx.cardview.widget.CardView
 
         return ViewHolder(listItem)
     }
@@ -47,7 +47,7 @@ class AccountArrayAdapter(
 
     fun isEmpty() = accounts.isEmpty()
 
-    class ViewHolder(val listItem: CardView) : RecyclerView.ViewHolder(listItem)
+    class ViewHolder(val listItem: androidx.cardview.widget.CardView) : androidx.recyclerview.widget.RecyclerView.ViewHolder(listItem)
 
     interface OnDeleteListener {
         fun onDelete(account: Account)

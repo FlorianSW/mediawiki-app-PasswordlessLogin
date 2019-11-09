@@ -20,10 +20,11 @@
         android:layout_marginBottom="56dp"
         />
 
-    <android.support.design.widget.BottomNavigationView
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/navigation"
+        android:background="@color/colorWhite"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_gravity="bottom"
